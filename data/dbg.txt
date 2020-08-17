@@ -1,0 +1,17 @@
+ollydbg
+windbg
+x32dbg
+x64dbg
+ida
+idat
+idaw
+ida64
+idat64
+idaw64
+cheat engine
+dbgview
+spyxx
+procexp
+procmon
+apimonitor
+kerberos

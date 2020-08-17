@@ -1,0 +1,103 @@
+BitCoin
+Ethereum
+Ripple
+Tether
+Bitcoin Cash
+Bitcoin SV
+LiteCoin
+Cardano
+Binance Coin
+ChainLink
+EOS
+Stellar
+Tezos
+OKB
+Monero
+TRON
+CRO
+Huobi Token
+Dash
+Etherium Classic
+MIOTA
+NEO
+NEM
+Ontology
+Zcash
+DogeCoin
+EthLend
+Maker
+Basic Attention Token
+Kyber Network
+0xProject
+Digibyte
+Quantum
+Makerdao
+True USD
+Augur
+PayPie
+Theta Token
+Decred
+Zilliqa
+Bitcoin Gold
+BitBay
+Waves
+OmiseGO
+Lisk
+Bitcoin Diamond
+Celsius
+Bytom
+ICON
+Ravencoin
+Grin
+Electroneum
+BTC
+ETH
+XRP
+USDT
+BCH
+BSV
+LTC
+ADA
+BNB
+LINK
+EOS
+XLM
+XTZ
+OKB
+XMR
+TRX
+CRO
+HT
+DASH
+ETC
+IOTA
+NEO
+XEM
+ONT
+ZEC
+DOGE
+LEND
+MKR
+BAT
+KNC
+ZRX
+DGB
+QTUM
+DAI
+TUSD
+REP
+PPP
+THETA
+DCR
+ZIL
+BTG
+BAY
+WAVES
+OMG
+LSK
+BCD
+CEL
+BTM
+ICX
+RVN
+ETN

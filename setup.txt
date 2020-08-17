@@ -1,0 +1,11 @@
+# README
+
+## 环境安装
+
+* chmod +x setup_run.sh
+* chmod +x run.sh
+* ./setup_run.sh
+
+## 测试验证
+
+* ./run.sh

@@ -25,36 +25,40 @@ DataCon2020大数据安全分析大赛，🏆【方向五】恶意代码分析�
 
 ## <span id="head2"> 最终排名（部分）</span>
 
-![最终排名](images\image-20200817122734929.png)
+![最终排名](images/image-20200817122734929.png)
 
 ## <span id="head3"> 赛题回顾</span>
 
-![赛题回顾](images\image-20200817135007515.png)
+![赛题回顾](images/image-20200817135007515.png)
 
 ## <span id="head4"> 启发与思路</span>
 
 * [挖矿软件常见套路][1]
-* ![挖矿软件常见套路](images\image-20200817124336272.png)
+* ![挖矿软件常见套路](images/image-20200817124336272.png)
 
 * 资格赛中获得的启发
 
-* ①~②：需要关注虚拟机、调试软件、反编译软件、逆向分析工具和杀软名
-* ③~⑤：需要关注系统关键路径、注册表
-* ⑥~⑦：需要关注域名、IP、端口、钱包地址、可见字符串
-* ⑧~⑩：同③~⑤
+  * ①~②：需要关注虚拟机、调试软件、反编译软件、逆向分析工具和杀软名
+  * ③~⑤：需要关注系统关键路径、注册表
+  * ⑥~⑦：需要关注域名、IP、端口、钱包地址、可见字符串
+  * ⑧~⑩：同③~⑤
 * 逆向工程中得到的思路
-* 通过逆向分析，发现许多样本函数名包含数据货币名、密码学算法名（哈希算法）。
-* ![函数名中数字货币名、哈希算法名](images\image-20200817124655908.png)
-* 很多带壳样本：UPX、Pelite、VMP……
-* ![UPX壳](images\image-20200817124742419.png)
-* 白样本含有很多其他类别恶意程序，如病毒、外挂……
-* ![外挂](images\image-20200817124803989.png)
+
+  * 通过逆向分析，发现许多样本函数名包含数据货币名、密码学算法名（哈希算法）。
+  * ![函数名中数字货币名、哈希算法名](images/image-20200817124655908.png)
+  * 很多带壳样本：UPX、Pelite、VMP……
+  * ![UPX壳](images/image-20200817124742419.png)
+  * 白样本含有很多其他类别恶意程序，如病毒、外挂……
+  * ![外挂](images/image-20200817124803989.png)
 
 ## <span id="head5"> 算法与模型</span>
 
 > 复赛环境搭建说明：[setup.txt](setup.txt)
+
 > 复赛预处理脚本：[run.py](run.py)
+
 > 复赛测试脚本：[test.py](test.py)
+
 > 复赛一键验证测试脚本：[run.sh](run.sh)
 
 本次初赛、附加赛与复赛我们队使用的五种算法或模型如下（其中在复赛中因为有性能的需求，部分模型未使用）：
@@ -63,7 +67,7 @@ DataCon2020大数据安全分析大赛，🏆【方向五】恶意代码分析�
 
 PE文件二进制每一个字节对应一个像素，最后缩放成固定大小的灰度图。这是最常见也容易实现的模型，在恶意代码检测中已经广泛使用。
 
-![灰度图转换](images\image-20200817135158335.png)
+![灰度图转换](images/image-20200817135158335.png)
 
 但我们仅在初赛时使用，原因如下：
 
@@ -79,14 +83,15 @@ PE文件二进制每一个字节对应一个像素，最后缩放成固定大小
 
 * 字节直方图：统计字节0-255出现个数
 * [字节熵直方图][2]：
-* 滑动一个1024字节的窗口，步长为256字节
-* 计算每个1024字节窗口的熵
-* 统计滑动窗口的（字节，熵值）对，最后转换成1x256维的特征向量
-* ![字节熵直方图](images\image-20200817140709050.png)
+  * 滑动一个1024字节的窗口，步长为256字节
+  * 计算每个1024字节窗口的熵
+  * 统计滑动窗口的（字节，熵值）对，最后转换成1x256维的特征向量
+  * ![字节熵直方图](images/image-20200817140709050.png)
 
 最后连接这两个特征向量，使用深度学习模型学习。效果好，预处理快，初赛单用这个模型便拿到`93.8425`分。
 
 > 预处理和验证可见本节一开始提到的脚本。
+
 > 复赛时的模型训练代码：[train_histogram.py](train_histogram.py)
 
 ### <span id="head8"> PE静态特征模型</span>
@@ -105,9 +110,10 @@ PE文件二进制每一个字节对应一个像素，最后缩放成固定大小
 - [ ] ImportsInfo：导入表被破坏，无法解析导入函数信息
 - [ ] StringExtractor：字符串提取在特征工程里做，这里删掉一是为了节省时间，二是防止特征重叠
 
-![PE文件静态特征](images\image-20200817143339662.png)
+![PE文件静态特征](images/image-20200817143339662.png)
 
 > 预处理和验证可见本节一开始提到的脚本。
+
 > 复赛时的模型训练代码：[train_pe_raw.py](train_pe_raw.py)
 
 ### <span id="head9"> 特征工程</span>
@@ -115,6 +121,7 @@ PE文件二进制每一个字节对应一个像素，最后缩放成固定大小
 我们队所用特征工程主要包括五部分，分别为：Section信息、字符匹配、Yara匹配、Opcode和其他布尔信息。
 
 > 预处理和验证可见本节一开始提到的脚本。
+
 > 复赛时的模型训练代码：[feature_engineering.py](feature_engineering.py)
 
 #### <span id="head10"> Section信息</span>
@@ -122,28 +129,28 @@ PE文件二进制每一个字节对应一个像素，最后缩放成固定大小
 节区特征是PE文件一种重要特征，过多的节区、异常的节区名、异常的资源节区个数等指标都可以指示这个PE文件的可疑程度，因此我们首先针对节区进行特征统计：
 
 * OEP所在节区名长度
-* OEP所在节区名一般为`.text`，如果过长或过短说明很可能被混淆
-* 比如UPX壳OEP处节区名为`UPX1`。
+  * OEP所在节区名一般为`.text`，如果过长或过短说明很可能被混淆
+  * 比如UPX壳OEP处节区名为`UPX1`。
 * 各可读、可写、可执行节区大小和熵，和各属性节区占文件大小比例
-* 举例：如果可执行节区占比过小，很可能加壳了（压缩壳）
+  * 举例：如果可执行节区占比过小，很可能加壳了（压缩壳）
 * 资源节区个数
-* 资源节区一般藏又一些压缩数据，比如挖矿恶意载荷
+  * 资源节区一般藏又一些压缩数据，比如挖矿恶意载荷
 * 节区总个数
-* 恶意软件节区数一般比较多
+  * 恶意软件节区数一般比较多
 
 #### <span id="head11"> 字符匹配</span>
 
 根据资格赛获得的启发，队员们手写相应的正则匹配模式，其中包括
 
 * 路径、注册表、URL、IP地址正则匹配
-* 其中因为注册表正则模式存在回溯问题，有的样本存在特别长的字符串，导致一个样本可能匹配了八分钟，所以我们复赛简单粗暴改成匹配字符串”reg”。主要原因是我们认为操作注册表必然存在相应函数，而这些函数名基本含有”reg”。
+  * 其中因为注册表正则模式存在回溯问题，有的样本存在特别长的字符串，导致一个样本可能匹配了八分钟，所以我们复赛简单粗暴改成匹配字符串”reg”。主要原因是我们认为操作注册表必然存在相应函数，而这些函数名基本含有”reg”。
 * 比特币钱包地址正则匹配
-* 主要写了三种货币：比特币、莱特币、门罗币
+  * 主要写了三种货币：比特币、莱特币、门罗币
 * 一些重要字符串匹配
-* ”MZ”、”PE”指示可能含别的PE文件
-* ”pool”、”cpu”、”gpu”、”coin”则是我们认为挖矿软件普遍存在的字符串
+  * ”MZ”、”PE”指示可能含别的PE文件
+  * ”pool”、”cpu”、”gpu”、”coin”则是我们认为挖矿软件普遍存在的字符串
 
-![字符匹配](images\image-20200817151537636.png)
+![字符匹配](images/image-20200817151537636.png)
 
 #### <span id="head12"> Yara匹配</span>
 
@@ -151,13 +158,12 @@ Yara规则是基于二进制文件中包含的文本或二进制字符串的描�
 
 * [壳规则](packer.yar)
 
-* 包含许多已知壳的Yara匹配规则
+  * 包含许多已知壳的Yara匹配规则
 
 * [密码学常量规则](rules\crypto_signatures.yar)
 
-* 特别是哈希算法初始值
-
-* 匹配时间略长，复赛忍痛舍弃
+  * 特别是哈希算法初始值
+  * 匹配时间略长，复赛忍痛舍弃
 
 最后我们还使用了[yarGen][5]工具，提取**训练集黑样本**特征，其原理是先解析出样本集中的共同的字符串，然后经过白名单库的过滤，最后通过启发式、机器学习等方式筛选出最优的Yara规则。根据得到的Yara规则集结果，选择匹配度大于某一阈值的规则形成新的规则集，查看匹配黑白样本的分布比例，筛选部分白样本规则。通过不断的调整阈值参数与筛除比例，在尽可能泛化的同时匹配到更多的黑样本，最后人工结合挖矿特征筛选出更值得关注的部分，优化规则集。
 
@@ -167,7 +173,7 @@ Yara规则是基于二进制文件中包含的文本或二进制字符串的描�
 
 通过传统逆向工具解析PE文件中的函数实在太耗时，因此我们打算通过简单的正则搜索识别代码中的函数，然后提取函数片段中的Opcode并保存。例如x86下，按栈匹配`push ebp; mov ebp, esp; ……; ret`如下图。
 
-![opcode](images\image-20200817154751914.png)
+![opcode](images/image-20200817154751914.png)
 
 原因是发现在挖矿样本中有大量样本间共有的opcode特征，而白样本中却不明显。因此可以统计匹配出的函数个数、opcode种类个数、平均值、方差等特征。
 
@@ -201,7 +207,7 @@ Yara规则是基于二进制文件中包含的文本或二进制字符串的描�
 2. GDL文件包含函数名（结点）、调用关系（边）
 3. 这样可以对函数调用次数进行排序，作为一种序列信息进行训练
 
-![gdl文件](F:\git\DataCon2020\images\image-20200817160950962.png)
+![gdl文件](images\image-20200817160950962.png)
 
 初赛使用效果不错，复赛因IDA Pro耗时过长放弃。
 
@@ -211,7 +217,7 @@ Yara规则是基于二进制文件中包含的文本或二进制字符串的描�
 
 这方面我们队员涉猎较少，可能选择的模型和融合的方式还有改进的空间，欢迎各位看客交流学习。
 
-![复赛模型融合](images\image-20200817161633785.png)
+![复赛模型融合](images/image-20200817161633785.png)
 
 ## <span id="head17"> 结果与改进</span>
 
@@ -219,31 +225,38 @@ Yara规则是基于二进制文件中包含的文本或二进制字符串的描�
 
 在判分前主办方提供了1k个测试样本，我们使用这1k个样本进行检验与测试，最终耗时大约为`1min20s`，得分为`95.52`分。
 
-![复赛预测分数](images\image-20200817162530108.png)
+![复赛预测分数](images/image-20200817162530108.png)
 
 因此预估判分用的1w多个样本耗时在`20min`上下，扣掉0.2分后与最终的`95.38`十分接近，证明了我们所用方法泛化能力以及稳定性。
 
 ### <span id="head19"> 改进方向</span>
 
 * 特征工程中我们提取的Opcode序列仅用了统计特征，我们也可以讲其当作一种序列信息，使用NLP方法训练学习。
+
 * 提供的样本中还是含有很多加壳样本的，因此我们可以对Yara匹配出的加壳样本进行单独处理。
 
 * 特征工程的完善，例如：
-* 任务计划名: Drivers、WebServers、DnsScan
-* Powershell、Vbs脚本
-* 端口，特别是高端口（>10000）
-* ……
+  * 任务计划名: Drivers、WebServers、DnsScan
+  * Powershell、Vbs脚本
+  * 端口，特别是高端口（>10000）
+  * ……
 
 ## <span id="head20"> 参考资料</span>
 
-[1]: https://zhuanlan.zhihu.com/p/164557943	"挖矿软件常见套路"
+1. [挖矿软件常见套路](https://zhuanlan.zhihu.com/p/164557943)
+2. [Deep Neural Network Based Malware Detection Using Two Dimensional Binary Program Features](https://arxiv.org/pdf/1508.03096.pdf)
+3. [EMBER: An Open Dataset for Training Static PE Malware Machine Learning Models](https://arxiv.org/abs/1804.04637)
+4. [Yara-Rules / rules](https://github.com/Yara-Rules/rules)
+5. [Neo23x0 / yarGen](https://github.com/Neo23x0/yarGen)
+6. [BrownFly / findAV](https://github.com/BrownFly/findAV)
+7. [Mining Pools Live Monitoring Tools](https://investoon.com/mining_pools)
+8. [DeepCG: Classifying Metamorphic Malware Through Deep Learning of Call Graphs](https://www.researchgate.net/publication/337954044_DeepCG_Classifying_Metamorphic_Malware_Through_Deep_Learning_of_Call_Graphs)
 
+[1]: https://zhuanlan.zhihu.com/p/164557943	"挖矿软件常见套路"
 [2]: https://arxiv.org/pdf/1508.03096.pdf	"Deep Neural Network Based Malware Detection Using Two Dimensional Binary Program Features"
 [3]: https://arxiv.org/abs/1804.04637	"EMBER: An Open Dataset for Training Static PE Malware Machine Learning Models"
 [4]: https://github.com/Yara-Rules/rules	"Yara-Rules / rules"
-
 [5]: https://github.com/Neo23x0/yarGen	"Neo23x0 / yarGen"
 [6]: https://github.com/BrownFly/findAV	"BrownFly / findAV"
 [7]: https://investoon.com/mining_pools	"Mining Pools Live Monitoring Tools"
-
 [8]: https://www.researchgate.net/publication/337954044_DeepCG_Classifying_Metamorphic_Malware_Through_Deep_Learning_of_Call_Graphs	"DeepCG: Classifying Metamorphic Malware Through Deep Learning of Call Graphs"

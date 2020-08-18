@@ -21,8 +21,8 @@ DataCon2020大数据安全分析大赛，🏆【方向五】恶意代码分析�
 	- [ 结果与改进](#head17)
 		- [ 复赛结果](#head18)
 		- [ 改进方向](#head19)
-  - [ 团队介绍](#head21)
-	- [ 参考资料](#head20)
+	- [ 团队介绍](#head20)
+	- [ 参考资料](#head21)
 
 ## <span id="head2"> 最终排名（部分）</span>
 
@@ -212,7 +212,7 @@ Yara规则是基于二进制文件中包含的文本或二进制字符串的描�
 
 初赛使用效果不错，复赛因IDA Pro耗时过长放弃。
 
-> 初赛时部分代码路径：`old/cg/`
+> 初赛时部分代码路径：[old/cg](old/cg)
 
 ### <span id="head16"> 复赛模型融合</span>
 
@@ -242,11 +242,11 @@ Yara规则是基于二进制文件中包含的文本或二进制字符串的描�
   * 端口，特别是高端口（>10000）
   * ……
 
-## <span id="head21"> 团队介绍</span>
+## <span id="head20"> 团队介绍</span>
 
 本战队所在的信工所六室威胁情报与威胁发现团队主要针对在线流量、落地样本（载荷）、安全日志、威胁情报等网络空间典型威胁数据进行分析，研究威胁情报智能处理、对抗性恶意代码分析、可疑网络/终端行为检测挖掘的技术与系统，培养具备高级威胁对抗分析技能的人才。同时，团队还建设和运营了国家网络空间威胁情报共享开放平台CNTIC（公众号cntic2017）, 研制了大规模恶意代码智能分析平台iMAS 以及网络恶意通信检测系统，均已应用于国家有关部门和地区的实际工作中。我们欢迎保研生、实习生加入，联系方式jiangzhengwei#iie.ac.cn。
 
-## <span id="head20"> 参考资料</span>
+## <span id="head21"> 参考资料</span>
 
 1. [挖矿软件常见套路](https://zhuanlan.zhihu.com/p/164557943)
 2. [Deep Neural Network Based Malware Detection Using Two Dimensional Binary Program Features](https://arxiv.org/pdf/1508.03096.pdf)

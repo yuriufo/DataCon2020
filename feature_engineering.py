@@ -20,23 +20,23 @@ warnings.filterwarnings("ignore")
 class Feature_engineering(object):
     
     def __init__(self):
-        self.path_pattern = re.compile(b'[C-Zc-z]:(?:(?:\\\\|/)[^\\\\/:*?"<>|"\x00-\x19\x7f-\xff]+)+(?:\\\\|/)?')
-        self.regs_pattern = re.compile(b'reg', re.IGNORECASE)# re.compile(b'[A-Z_ ]{5,}(?:\\\\[a-zA-Z ]+)+')
-        self.urls_pattern = re.compile(b'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+')
-        # self.strings_pattern = re.compile(b'[\x20-\x7f]{5,}')
-        self.ip_pattern = re.compile(b'(?:(?:25[0-5]|2[0-4]\d|[01]?\d{1,2})\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d{1,2})')
+self.path_pattern = re.compile(b'[C-Zc-z]:(?:(?:\\\\|/)[^\\\\/:*?"<>|"\x00-\x19\x7f-\xff]+)+(?:\\\\|/)?')
+self.regs_pattern = re.compile(b'reg', re.IGNORECASE)# re.compile(b'[A-Z_ ]{5,}(?:\\\\[a-zA-Z ]+)+')
+self.urls_pattern = re.compile(b'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+')
+# self.strings_pattern = re.compile(b'[\x20-\x7f]{5,}')
+self.ip_pattern = re.compile(b'(?:(?:25[0-5]|2[0-4]\d|[01]?\d{1,2})\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d{1,2})')
 
-        # #比特币钱包地址
-        self.wallet_pattern_btc = re.compile(b'(?:1|3|bc1|bitcoincash:q)(?:(?![0OIi])[0-9A-Za-z]){25,34}')
-        self.wallet_pattern_ltc = re.compile(b'(?:ltc1|M|L)[A-Za-z0-9]{25,36}')
-        self.wallet_pattern_xmr = re.compile(b'[0-9A-Za-z]{90,100}') #门罗币
+# #比特币钱包地址
+self.wallet_pattern_btc = re.compile(b'(?:1|3|bc1|bitcoincash:q)(?:(?![0OIi])[0-9A-Za-z]){25,34}')
+self.wallet_pattern_ltc = re.compile(b'(?:ltc1|M|L)[A-Za-z0-9]{25,36}')
+self.wallet_pattern_xmr = re.compile(b'[0-9A-Za-z]{90,100}') #门罗币
 
-        self.mz_pattern = re.compile(b'MZ')
-        self.pe_pattern = re.compile(b'PE')
-        self.pool_pattern = re.compile(b'pool', re.IGNORECASE)
-        self.cpu_pattern = re.compile(b'cpu', re.IGNORECASE)
-        self.gpu_pattern = re.compile(b'gpu', re.IGNORECASE)
-        self.coin_pattern = re.compile(b'coin', re.IGNORECASE)
+self.mz_pattern = re.compile(b'MZ')
+self.pe_pattern = re.compile(b'PE')
+self.pool_pattern = re.compile(b'pool', re.IGNORECASE)
+self.cpu_pattern = re.compile(b'cpu', re.IGNORECASE)
+self.gpu_pattern = re.compile(b'gpu', re.IGNORECASE)
+self.coin_pattern = re.compile(b'coin', re.IGNORECASE)
 
         self.pat_list = {"btc": self.wallet_pattern_btc, "ltc": self.wallet_pattern_ltc, "xmr": self.wallet_pattern_xmr, "paths": self.path_pattern,
                     "regs": self.regs_pattern, "urls": self.urls_pattern, "ips": self.ip_pattern, "mz": self.mz_pattern, # "other": self.strings_pattern,
@@ -78,7 +78,7 @@ class Feature_engineering(object):
             all_functions = self.m32_pat.findall(binary)
             for function in all_functions:
                 function_op = []
-                for _, _, mnemonic, _ in self.md64.disasm_lite(function, 0x0):
+                for _, _, mnemonic, _ in self.md32.disasm_lite(function, 0x0):
                     try:
                         function_op.append(self.opcode_dict[mnemonic])
                     except Exception:

@@ -99,7 +99,7 @@ PE文件二进制每一个字节对应一个像素，最后缩放成固定大小
 
 虽然提供的样本被抹掉了样本PE结构中的MZ、PE、导入导出表等信息，但我们只需要恢复`MZ`头和`PE\0\0`即可使用常规的分析工具对PE样本进行分析。
 
-因为恢复也只是能解析PE文件的静态格式和特征，并不能讲其运行，所以只能从静态特征入手。最后我们使用的是著名[EMBER][3]数据集提到的PE文件静态特征提取方法。虽然原文用于检测恶意Windows PE文件，但是我们也将其移植过来检测挖矿软件。
+因为恢复也只是能解析PE文件的静态格式和特征，并不能将其运行，所以只能从静态特征入手。最后我们使用的是著名[EMBER][3]数据集提到的PE文件静态特征提取方法。虽然原文用于检测恶意Windows PE文件，但是我们也将其移植过来检测挖矿软件。
 
 原始方法提取了许多PE文件静态特征，如下：
 
@@ -139,6 +139,34 @@ PE文件二进制每一个字节对应一个像素，最后缩放成固定大小
 * 节区总个数
   * 恶意软件节区数一般比较多
 
+```Python
+# OEP处section名长度
+section_info["entry"] = len(entry_section)
+section_info["section_num"] = len(lief_binary.sections)
+# 可读、可写、可执行sections大小均值
+sR, sW, sX = [], [], []
+# 可读、可写、可执行sections熵值均值
+entrR, entrW, entrX = [], [], []
+# 资源section个数
+rsrc_num = 0
+for s in lief_binary.sections:
+    props = [str(c).split('.')[-1] for c in s.characteristics_lists]
+    if "MEM_READ" in props:
+        sR.append(s.size)
+        entrR.append(s.entropy)
+    if "MEM_WRITE" in props:
+        sW.append(s.size)
+        entrW.append(s.entropy)
+    if "MEM_EXECUTE" in props:
+        sX.append(s.size)
+        entrX.append(s.entropy)
+    if 'rsrc' in s.name:
+        rsrc_num += 1
+section_info['size_R'], section_info['size_W'], section_info['size_X'] = np.mean(sR), np.mean(sW), np.mean(sX)
+section_info['entr_R'], section_info['entr_W'], section_info['entr_X'] = np.mean(entrR), np.mean(entrW), np.mean(entrX)
+section_info['rsrc_num'] = rsrc_num
+```
+
 #### <span id="head11"> 字符匹配</span>
 
 根据资格赛获得的启发，队员们手写相应的正则匹配模式，其中包括
@@ -151,7 +179,25 @@ PE文件二进制每一个字节对应一个像素，最后缩放成固定大小
   * ”MZ”、”PE”指示可能含别的PE文件
   * ”pool”、”cpu”、”gpu”、”coin”则是我们认为挖矿软件普遍存在的字符串
 
-![字符匹配](images/image-20200817151537636.png)
+```Python
+self.path_pattern = re.compile(b'[C-Zc-z]:(?:(?:\\\\|/)[^\\\\/:*?"<>|"\x00-\x19\x7f-\xff]+)+(?:\\\\|/)?')
+self.regs_pattern = re.compile(b'reg', re.IGNORECASE)# re.compile(b'[A-Z_ ]{5,}(?:\\\\[a-zA-Z ]+)+')
+self.urls_pattern = re.compile(b'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+')
+# self.strings_pattern = re.compile(b'[\x20-\x7f]{5,}')
+self.ip_pattern = re.compile(b'(?:(?:25[0-5]|2[0-4]\d|[01]?\d{1,2})\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d{1,2})')
+​
+# #比特币钱包地址
+self.wallet_pattern_btc = re.compile(b'(?:1|3|bc1|bitcoincash:q)(?:(?![0OIi])[0-9A-Za-z]){25,34}')
+self.wallet_pattern_ltc = re.compile(b'(?:ltc1|M|L)[A-Za-z0-9]{25,36}')
+self.wallet_pattern_xmr = re.compile(b'[0-9A-Za-z]{90,100}') #门罗币
+​
+self.mz_pattern = re.compile(b'MZ')
+self.pe_pattern = re.compile(b'PE')
+self.pool_pattern = re.compile(b'pool', re.IGNORECASE)
+self.cpu_pattern = re.compile(b'cpu', re.IGNORECASE)
+self.gpu_pattern = re.compile(b'gpu', re.IGNORECASE)
+self.coin_pattern = re.compile(b'coin', re.IGNORECASE)
+```
 
 #### <span id="head12"> Yara匹配</span>
 
@@ -172,9 +218,22 @@ Yara规则是基于二进制文件中包含的文本或二进制字符串的描�
 
 #### <span id="head13"> Opcode</span>
 
-通过传统逆向工具解析PE文件中的函数实在太耗时，因此我们打算通过简单的正则搜索识别代码中的函数，然后提取函数片段中的Opcode并保存。例如x86下，按栈匹配`push ebp; mov ebp, esp; ……; ret`如下图。
+通过传统逆向工具解析PE文件中的函数实在太耗时，因此我们打算通过简单的正则搜索识别代码中的函数，然后提取函数片段中的Opcode并保存。例如x86下，按栈匹配`push ebp; mov ebp, esp; ……; ret`如下代码段。
 
-![opcode](images/image-20200817154751914.png)
+```Python
+self.m32_pat = re.compile(b'\x55\x8b\xec[^\xc3]*\xc3')
+# …………
+all_functions = self.m32_pat.findall(binary)
+for function in all_functions:
+    function_op = []
+    for _, _, mnemonic, _ in self.md32.disasm_lite(function, 0x0):
+        try:
+            function_op.append(self.opcode_dict[mnemonic])
+        except Exception:
+            break
+    else:
+        op_pattern.append(function_op)
+```
 
 原因是发现在挖矿样本中有大量样本间共有的opcode特征，而白样本中却不明显。因此可以统计匹配出的函数个数、opcode种类个数、平均值、方差等特征。
 
@@ -205,10 +264,33 @@ Yara规则是基于二进制文件中包含的文本或二进制字符串的描�
 借鉴一篇[论文][8]的思路，处理流程如下：
 
 1. IDA Pro提取函数调用生成GDL(Graph Description Language)文件
-2. GDL文件包含函数名（结点）、调用关系（边）
+2. GDL文件包含函数名（结点）、调用关系（边），如下述代码段所示
 3. 这样可以对函数调用次数进行排序，作为一种序列信息进行训练
 
-![gdl文件](images/image-20200817160950962.png)
+```Yaml
+graph: {
+title: "Building graph"
+// IDA palette
+// ....
+colorentry 71: 255 255 0
+colorentry 72: 0 0 0
+colorentry 73: 0 0 0
+colorentry 74: 0 0 0
+colorentry 75: 0 255 255
+colorentry 76: 192 192 192
+// ....
+node: { title: "165" label: "__aulldiv" color: 75 textcolor: 73 bordercolor: black }
+node: { title: "166" label: "__aulldvrm" color: 75 textcolor: 73 bordercolor: black }
+node: { title: "167" label: "__aullshr" color: 75 textcolor: 73 bordercolor: black }
+// ....
+// node 169
+edge: { sourcename: "169" targetname: "135" }
+edge: { sourcename: "169" targetname: "136" }
+edge: { sourcename: "169" targetname: "170" }
+edge: { sourcename: "169" targetname: "171" }
+// ....
+}
+```
 
 初赛使用效果不错，复赛因IDA Pro耗时过长放弃。
 
@@ -232,7 +314,7 @@ Yara规则是基于二进制文件中包含的文本或二进制字符串的描�
 
 ### <span id="head19"> 改进方向</span>
 
-* 特征工程中我们提取的Opcode序列仅用了统计特征，我们也可以讲其当作一种序列信息，使用NLP方法训练学习。
+* 特征工程中我们提取的Opcode序列仅用了统计特征，我们也可以将其当作一种序列信息，使用NLP方法训练学习。
 
 * 提供的样本中还是含有很多加壳样本的，因此我们可以对Yara匹配出的加壳样本进行单独处理。
 
